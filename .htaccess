@@ -1,0 +1,16 @@
+Options +FollowSymlinks
+RewriteEngine on
+
+# Check if file does not exist, and not in static
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond static/$0 !-F 
+RewriteRule ^(.*)$ index.php [L]
+
+# Not application/framework
+RewriteCond %{REQUEST_URI} /(framework|application)/
+RewriteRule ^(.*)$ index.php [L]
+
+# Rewrite it to the static folder
+RewriteCond static/$0 -F
+RewriteRule ^(.*)$ static/$0 [L]
+
