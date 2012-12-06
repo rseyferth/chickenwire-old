@@ -1,17 +1,11 @@
 <?php
 
+	use ChickenWire\Core\ChickenWire as ChickenWire;
+	use ChickenWire\Lib\Filesystem\Path as Path;
+
 	// Load ChickenWire main class manually
 	require_once('core/chickenwire.class.php');
 
-	// Add basic class paths
-	ChickenWire::addClassPath(
-		$pathChickenWire . "/core/",
-		$pathChickenWire . "/controller/",
-		$pathChickenWire . "/lib/filesystem/",
-		$pathChickenWire . "/lib/util/",
-		$pathChickenWire . "/model/"
-	);
-	
 	// Get autoloading of classes to work
 	require_once('core/autoload.php');
 

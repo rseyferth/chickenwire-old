@@ -1,5 +1,10 @@
 <?php
 
+	namespace ChickenWire\Core;
+
+	use ChickenWire\Lib\Util\StringUtil;
+
+
 	class Request {
 
 
@@ -17,12 +22,14 @@
 			// Uri passed?
 			if (empty($uri)) {
 
+				// HTTPS?
+				$this->protocol = (array_key_exists("HTTPS", $_SERVER) && $_SERVER['HTTPS'] == 'on') ? "https" : "http";
+
 				// Use server data to form url
-				$this->uri = (strtolower(substr($_SERVER['SERVER_PROTOCOL'], 0, 5)) == "https" ? "https://" : "http://") . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+				$this->uri = $this->protocol . "://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 
 				// And get some other info at the same time
 				$this->method = $_SERVER['REQUEST_METHOD'];
-				$this->protocol = substr($_SERVER['SERVER_PROTOCOL'], 0, 5) == "https" ? "https" : "http";
 				$this->domain = $_SERVER['HTTP_HOST'];
 				$this->fullPath = $_SERVER['REQUEST_URI'];
 				$this->accept = explode(",", substr($_SERVER['HTTP_ACCEPT'], 0, strpos($_SERVER['HTTP_ACCEPT'], ";")));

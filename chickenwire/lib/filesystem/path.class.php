@@ -1,6 +1,21 @@
 <?php
 
+	namespace ChickenWire\Lib\Filesystem;
+
+	use ChickenWire\Lib\Util\StringUtil as StringUtil;
+
+
+	/**
+	 * Path manipulation and formatting
+	 * 
+	 * The path class is a static class used to format and manipulate path strings
+	 * 
+	 * @author Ruben Seyferth
+	 * @version 0.1
+	 */
 	class Path {
+
+
 
 		public static function Construct() {
 

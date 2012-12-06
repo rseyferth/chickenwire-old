@@ -1,5 +1,7 @@
 <?php
 
+	namespace ChickenWire\Lib\Util;
+
 	class StringUtil {
 
 		public static function randomString($length = 10) {
