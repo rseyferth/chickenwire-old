@@ -4,6 +4,8 @@
 
 	use ChickenWire\Lib\Util\StringUtil;
 	use ChickenWire\Lib\Util\ArrayUtil;
+	use ChickenWire\Request\Request;
+	use ChickenWire\Request\Format;
 
 	/**
 	 * ## Examples
@@ -22,8 +24,6 @@
 		public $action;				/** The action (method) to call on the controller */
 		public $model;				/** The Model with which this Route is associated */
 		public $method;				/** The HTTP method to filter on (GET/POST) */
-		public $controllerPath;
-		public $domainPattern;
 		public $formats;
 		public $protocol;
 		public $domains;
@@ -40,17 +40,16 @@
 	 	 * 
 	 	 * Possible options are:
 		 * 
-	 	 * option 			| type 		| default 	| description
-	 	 * ---------------- | --------- | --------- | -------------------------
-	 	 * controller       | string 	| 			| The controller for this route
-	 	 * action 			| string 	| "Index" 	| The controller-action to use
-	 	 * model 			| string 	| ""		| The model for this route. This can be used to auto-generate urls for models, using Route::editPath($modelInstance), Route::newPath(ModelClass), etc.
-	 	 * method 			| string 	| "" 		| HTTP method filter (POST or GET). When no method is passed, all methods are accepted
-	 	 * protocol			| string	| ""		| Server protocol filter ("https" or "http"). By default all protocols are accepted
-	 	 * controllerPath	| string	| "" 		| Local path where the controller class is located, relative to the default controller path
-	 	 * domains			| array		| 			| An array of domains this route is active for. By default this is empty, meaning all domains will match. You can use regular expressions in this array.
-		 * formats 			| array		| 			| The list of accepted formats. See ..........
-	 	 * 
+	 	 * option 			| type 			| default 	| description
+	 	 * ---------------- | ------------- | --------- | -------------------------
+	 	 * controller       | string 		| 			| The controller for this route
+	 	 * action 			| string 		| "Index" 	| The controller-action to use
+	 	 * model 			| string 		| ""		| The model for this route. This can be used to auto-generate urls for models, using Route::editPath($modelInstance), Route::newPath(ModelClass), etc.
+	 	 * method 			| string 		| "" 		| HTTP method filter (POST or GET). When no method is passed, all methods are accepted
+	 	 * protocol			| string		| ""		| Server protocol filter ("https" or "http"). By default all protocols are accepted
+	 	 * domains			| array			| 			| An array of domains this route is active for. By default this is empty, meaning all domains will match. You can use regular expressions in this array.
+		 * formats 			| array			| 			| The list of accepted formats. See ..........
+		 * 
 		 */
 		public function __construct($pattern, $options) {
 
@@ -115,12 +114,11 @@
 		 * Match the Route against the given Request
 		 * 
 		 * @param Request $request The request to match against the Route
+		 * @param Format $format The format to match against the Route
 		 * @param Array &$variables A pass-by-reference array, that will be filled with the variable matches in the Route
 		 * @return boolean Whether the Request matches this Route
 		 */
-		public function Match(Request $request, array &$variables = null) {
-
-			// TODO: 
+		public function Match(Request $request, Format $format, array &$variables = null) {
 
 			// Check if method matches
 			if (!empty($this->method) && $request->method != $this->method) {
@@ -153,6 +151,11 @@
 				}
 			}
 
+			// Check if format matches
+			if (!in_array($format, $this->getFormats())) {
+				return false;
+			}
+
 			// Match it!
 			preg_match_all($this->_regExPattern, $request->path, $matches);
 
@@ -175,6 +178,32 @@
 
 			// GOOD! :)
 			return true;
+
+		}
+
+		private function getFormats() {
+
+			// No formats given?
+			if (is_null($this->formats)) {
+
+				// Use the default formats
+				$formats = ChickenWire::get("defaultRouteFormats");
+				
+				// Still empty?
+				if (is_null($formats)) {
+
+					// That's no good
+					throw new \Exception("ChickenWire could not determine a format for Route '" . $this->pattern . "`. Either define formats for each Route, or use ChickenWire::set(\"defaultRouteFormats\", ...) in your configuration.", 1);
+					
+
+				}
+				return $formats;
+
+			} else {
+				return $this->formats;
+			}
+
+
 
 		}
 

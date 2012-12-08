@@ -35,7 +35,6 @@
 	 * NB: Do not change anything below this line.
 	 */
 
-
 	// Get current path
 	$pathRoot = pathinfo(__FILE__, PATHINFO_DIRNAME);
 

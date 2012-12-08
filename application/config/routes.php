@@ -1,9 +1,10 @@
 <?php
 
 	use ChickenWire\Core\ChickenWire;
+	use ChickenWire\Request\Format;
 
-	ChickenWire::AddRoute("/", 						array(	"controller" => "Hours" ));
-	ChickenWire::AddRoute("/{anything}/{#id}",			array(	"controller" => "Hours" ));
+	ChickenWire::AddRoute("/", 						array(	"controller" => "Hours",		"action" => "Index", 		"alias" => "/index" ));
+	
 	
 
 ?>

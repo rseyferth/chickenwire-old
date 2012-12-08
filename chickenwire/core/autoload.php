@@ -18,7 +18,7 @@
 				require_once($filename);
 			}
 
-		} elseif (count($parts) > 0 && $parts[0] == strtolower(ChickenWire::getApplicationNS())) {
+		} elseif (count($parts) > 0 && $parts[0] == strtolower(ChickenWire::get("applicationNamespace"))) {
 
 			// Look for it in the application directory
 			array_shift($parts);

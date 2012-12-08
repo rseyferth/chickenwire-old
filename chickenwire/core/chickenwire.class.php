@@ -2,6 +2,9 @@
 
 	namespace ChickenWire\Core;
 
+	use ChickenWire\Request\Request;
+	use ChickenWire\Request\Format;
+
 	/**
 	 * ChickenWire main class
 	 * 
@@ -48,17 +51,29 @@
 		 */
 		protected function findRoute() {
 
-			// Loop through routes
+			// Loop accept headers
 			$routeFound = null;
-			foreach (self::$_routes as $route) {
-				if ($route->Match($this->_request, $routeVars) == true) {
-					$routeFound = $route;
+			foreach ($this->_request->accept as $format) {
+
+				// Loop through routes
+				foreach (self::$_routes as $route) {
+					if ($route->Match($this->_request, $format, $routeVars) == true) {
+						$routeFound = $route;
+						break;
+					}
+				}
+
+				// Found something?
+				if (!is_null($routeFound)) {
 					break;
 				}
+
 			}
 
+			
+
 			// Found nothing?
-			if ($routeFound == null) { 
+			if (is_null($routeFound)) { 
 
 				// 404
 				ChickenWire::Send404();
@@ -81,7 +96,7 @@
 		protected function callController() {
 
 			// Create class name
-			$className = self::$_applicationNamespace . "\\Controllers\\" . $this->_activeRoute->controller;
+			$className = self::get("applicationNamespace") . "\\Controllers\\" . $this->_activeRoute->controller;
 
 			// Create the controller
 			$controllerInstance = new $className($this->_request, $this->_activeRoute, $this->_urlVariables);
@@ -98,40 +113,111 @@
 		}
 
 
+
 		static private $_routes = array();
-		static private $_applicationNamespace;
+		static private $_settings = array();
 
 
 		/**
 		 * Add a route to the routing for ChickenWire
 		 * 
 		 * @param string $pattern The url matching pattern for the Route. For details on how to use patterns, see Route.
-		 * @param Array $options Associative array containing options. For available options, see Route::__construct.
+		 * @param Array $options Associative array containing options. For available options, see Route::__construct. One special property you can use in this function is `alias`, which will in fact create the Route multiple times with the different patterns. `alias` can either be a string or an array of strings.
 		 */
 		public static function AddRoute ($pattern, $options) {
 
-			// Create route
-			$route = new Route($pattern, $options);
+			// Alias?
+			if (array_key_exists("alias", $options)) {
 
+				// Remove the alias setting
+				$alias = $options['alias'];
+				unset ($options['alias']);
+
+				// 1 alias?
+				if (is_string($alias)) {
+
+					// Create alias'ed route
+					$route = new Route($alias, $options);
+					array_push(self::$_routes, $route);
+
+				} elseif (is_array($alias)) {
+
+					// Loop 'em
+					foreach ($alias as $a) {
+						$route = new Route($a, $options);
+						array_push(self::$_routes, $route);
+					}
+
+				}
+
+			}
+
+			// Create route			
+			$route = new Route($pattern, $options);
+			
 			// Add it!
 			array_push(self::$_routes, $route);
 
 		}
 
+
+		public static function AddResource ($pattern, $options) {
+
+			throw new Exception("Not yet implemented", 1);
+			
+
+		}
+
+
+
 		/**
-		 * Set the namespace for your application
-		 * @param string $namespace The namespace for your application. E.g.: myapplication
+		 * Get a setting from ChickenWire
 		 */
-		public static function setApplicationNS($namespace) {
-			self::$_applicationNamespace = $namespace;
+		public static function get($name) {
+			if (array_key_exists($name, self::$_settings)) {
+				return self::$_settings[$name];
+			} else {
+				return null;
+			}
 		}
 
 		/**
-		 * Get the namespace that was set for your application
+		 * Set a setting for ChickenWire
 		 */
-		public static function getApplicationNS() {
-			return self::$_applicationNamespace;
+		public static function set($name, $value) {
+
+
+			// Property already there?
+			if (array_key_exists($name, self::$_settings)) {
+
+				// Just set it then
+				self::$_settings[$name] = $value;
+				return;
+
+			}
+
+			// Known property?
+			if ($name != "applicationNamespace" && 
+				$name != "defaultLayout" &&
+				$name != "phpExtension" &&
+				$name != "extensionOverridesAcceptHeaders" &&
+				$name != "defaultFormat" &&
+				$name != "defaultRouteFormats" &&
+				$name != "pathCSS" &&
+				$name != "pathJavascript" &&
+				$name != "pathImages" &&
+				$name != "useAbsoluteUrls") {
+
+				throw new \Exception("There is no setting for '" . $name . "'", 1);				
+
+			}
+
+			// Set it
+			self::$_settings[$name] = $value;
+			return;
+
 		}
+
 
 
 		public static function Send404() {

@@ -1,7 +1,8 @@
 <?php
 
-	namespace ChickenWire\Core;
+	namespace ChickenWire\Request;
 
+	use ChickenWire\Core\ChickenWire;
 	use ChickenWire\Lib\Util\StringUtil;
 
 
@@ -16,6 +17,8 @@
 		public $accept;
 		public $acceptLanguage;
 		public $uri;
+		public $extension;
+		public $format;
 		
 		public function __construct($uri = "") {
 
@@ -32,9 +35,8 @@
 				$this->method = $_SERVER['REQUEST_METHOD'];
 				$this->domain = $_SERVER['HTTP_HOST'];
 				$this->fullPath = $_SERVER['REQUEST_URI'];
-				$this->accept = explode(",", substr($_SERVER['HTTP_ACCEPT'], 0, strpos($_SERVER['HTTP_ACCEPT'], ";")));
+				$this->accept = Format::FromHTTPAcceptHeader($_SERVER['HTTP_ACCEPT']);
 				$this->acceptLanguage = explode(",", substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, strpos($_SERVER['HTTP_ACCEPT_LANGUAGE'], ";")));
-				
 
 			} else {
 
@@ -59,6 +61,39 @@
 				$this->path = substr($this->path, strlen($basePath));
 
 			}
+
+			// Check path for ?querystring
+			$qPos =strpos($this->path, '?');
+			if ($qPos > 0) {
+				$this->path = substr($this->path, 0, $qPos);
+			}
+
+
+			// Check path for extension
+			preg_match_all("/(.+)\.([a-z]+)$/i", $this->path, $matches);
+			if (count($matches[0]) == 1 && !is_null(Format::FromExtension($matches[2][0]))) {
+
+				// Extension found
+				$this->extension = $matches[2][0];
+				$this->path = $matches[1][0];
+
+				// Now look for format that matches this one (if extension overrides Accept headers)
+				if (ChickenWire::get("extensionOverridesAcceptHeaders") !== false || is_null($this->accept)) {
+
+					// Find format
+					$format = Format::FromExtension($this->extension);
+					if (!is_null($format)) {
+						$this->accept = array($format);
+					}
+
+				}
+
+			}
+
+			// Store format
+			$this->format = $this->accept[0];
+			
+				
 
 		}
 
