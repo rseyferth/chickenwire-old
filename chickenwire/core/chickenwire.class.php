@@ -5,6 +5,8 @@
 	use ChickenWire\Request\Request;
 	use ChickenWire\Request\Format;
 
+	use ChickenWire\ActiveRecord\Connection;
+
 	/**
 	 * ChickenWire main class
 	 * 
@@ -22,6 +24,7 @@
 		protected $_request;
 		protected $_activeRoute;
 		protected $_urlVariables;
+
 
 
 		/**
@@ -116,7 +119,47 @@
 
 		static private $_routes = array();
 		static private $_settings = array();
+		static private $_databases = array();
 
+
+		public static function DB($connection = "") {
+
+			// No connection given?
+			if (empty($connection)) {
+
+				// Get default connection
+				$connection = ChickenWire::get("database::default");
+
+				// Null?
+				if (is_null($connection)) {
+					throw new Exception("No default database has been selected. Use ChickenWire::set('database::default').", 1);					
+				}
+
+			}
+
+			// Is the connection already made?
+			if (array_key_exists($connection, self::$_databases)) {
+
+				// Return it now
+				return self::$_databases[$connection];
+
+			}
+
+			// Look up settings
+			$dbs = ChickenWire::get("database::connections");
+			if (is_null($dbs) || !array_key_exists($connection, $dbs)) {
+				throw new Exception("No database connection found for '$connection'.", 1);					
+			}
+			
+			// Create
+			$conn = Connection::Create($dbs[$connection]);
+			
+			// Store and return
+			self::$_databases[$connection] = $conn;
+			return $conn;
+
+
+		}
 
 		/**
 		 * Add a route to the routing for ChickenWire
@@ -199,8 +242,12 @@
 			// Known property?
 			if ($name != "applicationNamespace" && 
 				$name != "defaultLayout" &&
+				$name != "environment" &&
+				$name != "database::connections" &&
+				$name != "database::default" &&
 				$name != "phpExtension" &&
 				$name != "extensionOverridesAcceptHeaders" &&
+				$name != "memCache" &&
 				$name != "defaultFormat" &&
 				$name != "defaultRouteFormats" &&
 				$name != "pathCSS" &&

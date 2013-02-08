@@ -54,7 +54,7 @@
 		 * @param Array $array The array
 		 * @return * The last item in the given array, or null when the array is empty.
 		 */
-		public static function LastItem(Array $array) {
+		public static function LastItem(array $array) {
 
 			// Anything?
 			if (count($array) == 0) {
@@ -64,6 +64,20 @@
 			// Return it
 			return $array[count($array) - 1];
 
+		}
+
+		/**
+		* Check if first key of the array is a string value
+		*/
+		public static function IsHash($array) {
+
+			if (!is_array($array)) {
+				return false;
+			}
+
+			$keys = array_keys($array);
+			return @is_string($keys[0]) ? true : false;
+		
 		}
 
 	}

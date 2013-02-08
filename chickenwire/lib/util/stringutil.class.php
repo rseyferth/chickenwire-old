@@ -131,6 +131,13 @@
 		}
 
 
+
+		public static function tableize($str) {
+
+			return StringUtil::pluralize(strtolower($str));
+		}
+
+
 	}
 
 

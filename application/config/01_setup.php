@@ -25,7 +25,8 @@
 
 	// Set whether to use absolute URLs
 	ChickenWire::set("useAbsoluteUrls", false);
-	
 
+	// Memory cache (http://www.php.net/manual/en/book.memcache.php)
+	ChickenWire::set("memCache", "localhost:11211");
 
 ?>
