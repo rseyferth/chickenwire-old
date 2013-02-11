@@ -58,7 +58,7 @@
 		}
 
 		public static function titleize($string) {
-			return ucfirst($string);
+			return ucfirst(strtolower($string));
 		}
 
 		public static function pluralize($string, $count = 2) {

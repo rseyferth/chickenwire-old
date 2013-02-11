@@ -6,11 +6,9 @@
 
 	class Hour extends Model {
 
-//		static $connection = 'development';
-
-
-
-
+		//static $database = 'wipkip_admin';
+		
+		
 	}
 
 

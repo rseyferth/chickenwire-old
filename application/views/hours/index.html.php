@@ -5,5 +5,16 @@
 
 <?php $this->EndContentFor(); ?>
 
-BODY 2. PHP.
+We have <b><?php echo(count($this->hours)); ?></b> hours.<br />
+<br />
+<ul>
+<?php
 
+	foreach($this->hours as $hour) {
+
+		?><li><?php echo ($hour->date . ": " . $hour->nr_hours); ?> (<?= $hour->description ?>)</li><?php
+
+	}
+
+?>
+</ul>

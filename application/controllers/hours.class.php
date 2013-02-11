@@ -6,6 +6,8 @@
 	use ChickenWire\Request\Format;
 
 	use WipkipAdmin\Models\Hour;
+
+	use ChickenWire\ActiveRecord\ActiveDateTime;
 	
 
 	class Hours extends Controller {
@@ -20,7 +22,13 @@
 		 */
 		public function Index() {
 
-			$hours = Hour::Find("last");
+
+			$hour = Hour::Find(11);
+			$hour->Delete();
+			var_dump($hour);
+
+
+			$this->hours = Hour::All();
 
 			switch ($this->request->format) {
 
@@ -29,7 +37,7 @@
 					break;
 
 				case "JSON":
-					$this->Render(array("json" => array("TeSt" => "Jhoh")));
+					$this->Render(array("json" => $this->hours));
 					break;
 
 			}

@@ -100,7 +100,11 @@
 			}
 
 			// Set content type
-			header("Content-type: " . $this->request->format->contentTypes[0]);
+			$contentType = $this->request->format->contentTypes[0];
+			if (strpos(';', $contentType) === false) {
+				$contentType .= ';charset=' . strtoupper(ChickenWire::get("defaultCharset"));
+			}
+			header("Content-type: " . $contentType);
 
 			// Instantiate rendered content array
 			$this->renderedContent = array("main" => "");
@@ -180,15 +184,15 @@
 				if (is_object($json)) {
 
 					// As json?
-					if (is_subclass_of($json, "ChickenWire\Data\IJsonObject")) {
+					if (is_subclass_of($json, "ChickenWire\Data\ISerializable")) {
 
 						// Call the asjson function
-						echo (json_encode($json->AsJson()));
+						echo (json_encode($json->serializeJSON($options)));
 
 					} else {
 
 						// Not possible
-						throw new \Exception("Object passed to render as Json was invalid.", 1);
+						throw new \Exception("Object passed to render as Json should implement ChickenWire\Data\ISerializable", 1);
 
 					}
 

@@ -121,6 +121,8 @@
 		static private $_settings = array();
 		static private $_databases = array();
 
+		static private $logger = null;
+
 
 		public static function DB($connection = "") {
 
@@ -241,6 +243,7 @@
 
 			// Known property?
 			if ($name != "applicationNamespace" && 
+				$name != "defaultCharset" &&
 				$name != "defaultLayout" &&
 				$name != "environment" &&
 				$name != "database::connections" &&
@@ -248,6 +251,7 @@
 				$name != "phpExtension" &&
 				$name != "extensionOverridesAcceptHeaders" &&
 				$name != "memCache" &&
+				$name != "log" &&
 				$name != "defaultFormat" &&
 				$name != "defaultRouteFormats" &&
 				$name != "pathCSS" &&
@@ -272,6 +276,45 @@
 			// Render error controller?
 			header("HTTP/1.1 404 Not Found");
 			echo ("<h1>404</h1><p>TODO: Render error page.</p>");
+
+		}
+
+
+		private static function _Log() {
+
+			// Check arguments and add datetime
+			$args = func_get_args();
+			$args[0] = '[' . date('Y-m-d H:i:s') . '] ' . $args[0];
+
+			// Call the logger
+			call_user_func_array(array(self::$logger, 'Log'), $args);
+
+		}
+
+
+		public static function Log() {
+
+			
+
+			// Logger defined?
+			if (!is_null(self::$logger)) {
+
+				call_user_func_array("self::_Log", func_get_args());
+				return;
+
+			}
+
+			// Log enabled?
+			if (!is_null(self::get("log"))) {
+
+				// Create logger
+				$loggerClass = "ChickenWire\\Lib\\Log\\" . self::get("log");
+				self::$logger = new $loggerClass();
+
+				call_user_func_array("self::_Log", func_get_args());
+				return;
+
+			}
 
 		}
 
